@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Zambia Environmental Quality Monitoring Network | AQMN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #0a2a2f 0%, #052025 100%);
+            color: #f0f9ff;
+            min-height: 100vh;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1e5a6b; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #2dd4bf; border-radius: 10px; }
+
+        /* Navigation Bar */
+        .navbar {
+            background: rgba(5, 35, 40, 0.96);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 0.8rem 2rem;
+            border-bottom: 2px solid #2dd4bf;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo i {
+            font-size: 2rem;
+            color: #2dd4bf;
+            filter: drop-shadow(0 0 6px #2dd4bf);
+        }
+
+        .logo h1 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, #2dd4bf);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .logo p {
+            font-size: 0.65rem;
+            opacity: 0.8;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .nav-btn {
+            background: rgba(45, 212, 191, 0.1);
+            border: 1px solid rgba(45, 212, 191, 0.3);
+            color: #e2f3f5;
+            padding: 0.55rem 1.1rem;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.25s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-btn i { font-size: 0.9rem; }
+
+        .nav-btn:hover, .nav-btn.active {
+            background: #2dd4bf;
+            color: #052025;
+            border-color: #2dd4bf;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(45, 212, 191, 0.4);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 1.8rem auto;
+            padding: 0 2rem 2rem;
+        }
+
+        /* Pages */
+        .page {
+            display: none;
+            animation: fadeSlide 0.4s ease;
+        }
+        .page.active { display: block; }
+
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(18px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(10, 55, 65, 0.65);
+            backdrop-filter: blur(12px);
+            border-radius: 28px;
+            padding: 1.6rem 2rem;
+            border: 1px solid rgba(45, 212, 191, 0.3);
+            margin-bottom: 1.8rem;
+            transition: all 0.2s;
+        }
+        .card:hover { border-color: rgba(45, 212, 191, 0.7); }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(145deg, rgba(45,212,191,0.12), rgba(15,75,85,0.3));
+            border-radius: 24px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid rgba(45,212,191,0.3);
+            transition: 0.2s;
+        }
+        .stat-value {
+            font-size: 2.6rem;
+            font-weight: 800;
+            margin: 0.5rem 0;
+            background: linear-gradient(135deg, #fff, #7ae9db);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* Forms */
+        .form-group { margin-bottom: 1.4rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #c0f2ec; }
+        input, select, textarea {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            border-radius: 20px;
+            border: 1px solid rgba(45,212,191,0.4);
+            background: rgba(0,20,25,0.6);
+            color: white;
+            font-size: 1rem;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #2dd4bf;
+            box-shadow: 0 0 12px rgba(45,212,191,0.3);
+        }
+        button {
+            background: linear-gradient(95deg, #2dd4bf, #1fa588);
+            border: none;
+            padding: 0.8rem 1.8rem;
+            border-radius: 40px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #052025;
+            font-size: 0.95rem;
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(45,212,191,0.4); }
+
+        /* Alert cards */
+        .alert-card {
+            border-left: 5px solid;
+            margin-bottom: 1rem;
+            padding: 1rem 1.3rem;
+            border-radius: 20px;
+            background: rgba(0,0,0,0.2);
+        }
+        .alert-CRITICAL { border-left-color: #ff4d4d; background: rgba(255,77,77,0.1); }
+        .alert-HIGH { border-left-color: #ffaa44; background: rgba(255,170,68,0.1); }
+        .alert-MODERATE { border-left-color: #ffcc66; background: rgba(255,204,102,0.08); }
+        .alert-NORMAL { border-left-color: #44ffaa; background: rgba(68,255,170,0.05); }
+
+        /* Table */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        .data-table th, .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(45,212,191,0.2);
+        }
+        .data-table th { background: rgba(45,212,191,0.2); font-weight: 600; }
+
+        /* Educational grid */
+        .edu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+        .edu-item {
+            background: rgba(0,55,65,0.5);
+            border-radius: 24px;
+            padding: 1.4rem;
+            border: 1px solid rgba(45,212,191,0.3);
+        }
+        .edu-item i { font-size: 2rem; color: #2dd4bf; margin-bottom: 0.8rem; display: inline-block; }
+
+        .badge-zambia {
+            background: #2dd4bf20;
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 1.5rem;
+            border-top: 1px solid rgba(45,212,191,0.3);
+            font-size: 0.8rem;
+        }
+        @media (max-width: 750px) {
+            .container { padding: 0 1rem; }
+            .nav-btn { padding: 0.4rem 0.8rem; font-size: 0.7rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <div class="nav-container">
+        <div class="logo">
+            <i class="fas fa-leaf"></i>
+            <div><h1>Zambia AQMN</h1><p>Environmental Comfort & Air Quality Network</p></div>
+        </div>
+        <div class="nav-links" id="navLinks">
+            <button class="nav-btn active" data-page="home"><i class="fas fa-home"></i> Home</button>
+            <button class="nav-btn" data-page="dashboard"><i class="fas fa-chart-line"></i> Live Monitor</button>
+            <button class="nav-btn" data-page="dataEntry"><i class="fas fa-microchip"></i> Add Reading</button>
+            <button class="nav-btn" data-page="education"><i class="fas fa-graduation-cap"></i> Education</button>
+            <button class="nav-btn" data-page="alerts"><i class="fas fa-bell"></i> Alerts</button>
+            <button class="nav-btn" data-page="history"><i class="fas fa-history"></i> History</button>
+            <button class="nav-btn" data-page="about"><i class="fas fa-info-circle"></i> About</button>
+            <button class="nav-btn" data-page="contact"><i class="fas fa-envelope"></i> Contact</button>
+            <button class="nav-btn" data-page="help"><i class="fas fa-question-circle"></i> Help</button>
+        </div>
+    </div>
+</div>
+
+<div class="container" id="appContainer">
+    <!-- ================== HOME PAGE ================== -->
+    <div id="home" class="page active">
+        <div class="card" style="text-align: center;">
+            <i class="fas fa-chart-network" style="font-size: 3.5rem; color: #2dd4bf;"></i>
+            <h1 style="margin: 0.8rem 0; font-size: 2rem;">Zambia Environmental Quality Monitoring Network</h1>
+            <p style="font-size: 1.1rem;">Real-time temperature & humidity insights for healthier communities across all provinces.</p>
+            <button onclick="switchToPage('dataEntry')" style="margin-top: 1.2rem;"><i class="fas fa-plus-circle"></i> Contribute Data</button>
+        </div>
+
+        <div class="stats-grid" id="homeStats">
+            <div class="stat-card"><i class="fas fa-thermometer-half"></i><div class="stat-value" id="homeTemp">--</div><div>Current Avg Temperature</div></div>
+            <div class="stat-card"><i class="fas fa-tint"></i><div class="stat-value" id="homeHum">--</div><div>Current Humidity</div></div>
+            <div class="stat-card"><i class="fas fa-chart-simple"></i><div class="stat-value" id="homeTHI">--</div><div>THI Index</div></div>
+            <div class="stat-card"><i class="fas fa-bell"></i><div class="stat-value" id="homeAlertCount">0</div><div>Active Alerts</div></div>
+        </div>
+
+        <div class="edu-grid">
+            <div class="edu-item"><i class="fas fa-city"></i><h3>Urban Zambia Challenge</h3><p>Lusaka, Kitwe, Ndola face rising temperatures and humidity. Our network empowers communities with actionable data.</p></div>
+            <div class="edu-item"><i class="fas fa-microchip"></i><h3>DHT22 + ESP32 Tech</h3><p>Low-cost, high-accuracy sensors (±0.5°C) deployed across urban nodes for reliable environmental tracking.</p></div>
+            <div class="edu-item"><i class="fas fa-hand-holding-heart"></i><h3>Public Health Impact</h3><p>Real-time alerts help reduce heat stress, protect vulnerable groups, and support climate adaptation.</p></div>
+        </div>
+    </div>
+
+    <!-- ================== DASHBOARD ================== -->
+    <div id="dashboard" class="page">
+        <h2><i class="fas fa-tachometer-alt"></i> Live Environmental Dashboard</h2>
+        <div class="stats-grid">
+            <div class="stat-card"><i class="fas fa-thermometer-half"></i><div class="stat-value" id="dashTemp">--</div><div>Temperature (°C)</div></div>
+            <div class="stat-card"><i class="fas fa-tint"></i><div class="stat-value" id="dashHum">--</div><div>Humidity (%)</div></div>
+            <div class="stat-card"><i class="fas fa-chart-simple"></i><div class="stat-value" id="dashTHI">--</div><div>THI Index</div></div>
+            <div class="stat-card"><i class="fas fa-smog"></i><div class="stat-value" id="dashAQI">--</div><div>Air Quality</div></div>
+        </div>
+        <div id="dashboardAdvice" class="card"></div>
+        <div class="card"><canvas id="trendChart" height="180"></canvas><p class="badge-zambia">Last 10 readings trend</p></div>
+    </div>
+
+    <!-- ================== DATA ENTRY ================== -->
+    <div id="dataEntry" class="page">
+        <h2><i class="fas fa-edit"></i> Submit Environmental Reading (DHT22 / ESP32)</h2>
+        <div class="card">
+            <form id="readingForm">
+                <div class="form-group"><label><i class="fas fa-map-marker-alt"></i> Location (Zambian Urban Area)</label><select id="locationSelect"><option>Lusaka CBD</option><option>Kitwe Industrial</option><option>Ndola Central</option><option>Livingstone Tourist</option><option>Kabwe Town</option><option>Chingola</option><option>Other Province</option></select></div>
+                <div class="form-group"><label><i class="fas fa-thermometer-half"></i> Temperature (°C)</label><input type="number" id="tempInput" step="0.1" required placeholder="e.g., 28.6"></div>
+                <div class="form-group"><label><i class="fas fa-tint"></i> Humidity (%)</label><input type="number" id="humInput" step="0.1" required placeholder="e.g., 65"></div>
+                <div class="form-group"><label><i class="fas fa-microchip"></i> Device ID (optional)</label><input type="text" id="deviceId" placeholder="ESP32_001 / Arduino_DHT22"></div>
+                <button type="submit"><i class="fas fa-cloud-upload-alt"></i> Analyze & Save Reading</button>
+                <button type="button" onclick="generateMockReadings()" style="margin-left: 1rem; background: #3b6e6b;"><i class="fas fa-flask"></i> Generate Demo Data</button>
+            </form>
+        </div>
+        <div id="analysisLiveResult" style="display: none;"></div>
+    </div>
+
+    <!-- ================== EDUCATION PAGE ================== -->
+    <div id="education" class="page">
+        <div class="card"><h2><i class="fas fa-graduation-cap"></i> Understanding Air Quality & Thermal Comfort in Zambia</h2><p>Temperature and humidity directly affect health, productivity, and well-being. Our network helps you stay informed.</p></div>
+        <div class="edu-grid">
+            <div class="edu-item"><i class="fas fa-chart-line"></i><h3>Temperature-Humidity Index (THI)</h3><p>THI > 75 = Discomfort, > 80 = Severe risk. Monitor to avoid heat exhaustion.</p></div>
+            <div class="edu-item"><i class="fas fa-heartbeat"></i><h3>Health Effects</h3><p>High heat + humidity increases respiratory issues, dehydration, and cardiovascular strain. Children and elderly most vulnerable.</p></div>
+            <div class="edu-item"><i class="fas fa-hand-sparkles"></i><h3>Protective Actions</h3><p>Drink water, use fans, limit outdoor work during peak sun (11am-3pm), wear light clothes.</p></div>
+            <div class="edu-item"><i class="fas fa-tree"></i><h3>Zambia’s Climate Challenge</h3><p>Rapid urbanization creates heat islands. Green spaces and smart monitoring reduce risks.</p></div>
+            <div class="edu-item"><i class="fas fa-chart-bar"></i><h3>How This Project Helps</h3><p>Provides real-time local data, empowers communities, and supports government policy for healthier cities.</p></div>
+            <div class="edu-item"><i class="fas fa-users"></i><h3>Community Engagement</h3><p>Anyone can submit readings; schools, health posts, and local leaders can use dashboards for early warnings.</p></div>
+        </div>
+        <div class="card"><h3><i class="fas fa-globe-africa"></i> For Every Zambian: Why It Matters</h3><p>From Lusaka's high-density compounds to Copperbelt mining towns, accurate environmental data saves lives. This platform bridges the gap between citizens and environmental intelligence — free, accessible, and built for Zambia.</p></div>
+    </div>
+
+    <!-- ================== ALERTS ================== -->
+    <div id="alerts" class="page">
+        <h2><i class="fas fa-bell"></i> Active Environmental Alerts</h2>
+        <div id="alertsContainer"></div>
+        <button onclick="clearAllAlerts()" style="margin-top: 0.8rem;"><i class="fas fa-trash-alt"></i> Dismiss All Alerts</button>
+    </div>
+
+    <!-- ================== HISTORY ================== -->
+    <div id="history" class="page">
+        <h2><i class="fas fa-history"></i> Complete Reading History</h2>
+        <div class="card"><div style="overflow-x: auto;"><table class="data-table" id="historyTableFull"><thead><tr><th>Date & Time</th><th>Location</th><th>Temp (°C)</th><th>Humidity (%)</th><th>THI</th><th>Alert Level</th><th>Health Advice</th></tr></thead><tbody id="historyTbody"></tbody></table></div></div>
+        <button onclick="exportHistoryCSV()"><i class="fas fa-download"></i> Export CSV</button>
+    </div>
+
+    <!-- ================== ABOUT ================== -->
+    <div id="about" class="page">
+        <div class="card"><h2><i class="fas fa-info-circle"></i> About the Project</h2><p><strong>Project:</strong> Design and Implementation of an Environmental Comfort and Air Quality Indicator Network for Urban Areas in Zambia</p><p><strong>Researcher:</strong> Mwape Kelvin (202203897) | <strong>Supervisor:</strong> Mrs. Mulwanda</p><p><strong>Institution:</strong> Mulungushi University, School of Engineering and Technology</p><p><strong>Technology:</strong> DHT22 sensors, ESP32/Arduino, Node.js/SQLite, modern web dashboard. The system provides real-time heat stress alerts and supports SDG 3, 11, and 13.</p><hr><h3>Vision</h3><p>Empower every Zambian community with accessible air quality intelligence to reduce heat-related illnesses and promote climate resilience.</p></div>
+    </div>
+
+    <!-- ================== CONTACT ================== -->
+    <div id="contact" class="page">
+        <div class="card"><h2><i class="fas fa-envelope"></i> Get in Touch</h2><form id="contactForm"><div class="form-group"><label>Full Name</label><input type="text" id="contactName" required></div><div class="form-group"><label>Email</label><input type="email" id="contactEmail"></div><div class="form-group"><label>Message / Collaboration</label><textarea id="contactMsg" rows="3" required></textarea></div><button type="submit"><i class="fas fa-paper-plane"></i> Send Message</button></form><hr><p><i class="fas fa-phone-alt"></i> +260 772 662225 &nbsp;|&nbsp; <i class="fas fa-envelope"></i> mwape.kelvin@mulungushi.ac.zm</p><p>📍 Mulungushi University, Great North Road, Kabwe, Zambia</p></div>
+    </div>
+
+    <!-- ================== HELP ================== -->
+    <div id="help" class="page">
+        <div class="card"><h2><i class="fas fa-question-circle"></i> Frequently Asked Questions</h2><div><h3>❓ How accurate is DHT22 data?</h3><p>±0.5°C temperature, ±2% humidity — reliable for urban monitoring.</p><h3>❓ How can I contribute?</h3><p>Use the "Add Reading" page with your sensor data or contact us for node installation.</p><h3>❓ Is this available across Zambia?</h3><p>We aim to expand to all 10 provinces. Communities can adopt low-cost nodes.</p><h3>❓ What does THI mean?</h3><p>Temperature-Humidity Index; above 75 indicates discomfort, above 80 is dangerous.</p><h3>❓ Can schools/health centers use this?</h3><p>Absolutely! The dashboard is free and can be displayed in public spaces for awareness.</p></div></div>
+    </div>
+    <footer>© 2025 Mulungushi University — Environmental Comfort & Air Quality Indicator Network | Real-time data for a healthier Zambia</footer>
+</div>
+
+<script>
+    // ---------- DATA MODEL (localStorage) ----------
+    let readings = [];       // each: { id, timestamp, location, temperature, humidity, thi, alertLevel, advice, aqiCategory }
+    let alertsDB = [];
+
+    // Helper functions
+    function calculateTHI(tempC, hum) {
+        let tempF = (tempC * 9/5) + 32;
+        let thi = 0.5 * (tempF + 61.0 + ((tempF - 68.0) * 1.2) + (hum * 0.094));
+        return Math.round(thi * 10) / 10;
+    }
+
+    function analyzeEnvironment(temp, hum) {
+        let thi = calculateTHI(temp, hum);
+        let alertLevel = "NORMAL";
+        let advice = "";
+        let aqiCategory = "Good";
+        
+        if (temp > 35 || thi > 85) { alertLevel = "CRITICAL"; advice = "🚨 CRITICAL: Extreme heat! Move to cool area, hydrate urgently. Avoid any outdoor activity."; aqiCategory = "Very Unhealthy"; }
+        else if (temp > 32 || thi > 80) { alertLevel = "HIGH"; advice = "⚠️ HIGH ALERT: Severe discomfort. Limit outdoor work, drink water often, use fans/AC."; aqiCategory = "Unhealthy"; }
+        else if (temp > 28 || thi > 75) { alertLevel = "MODERATE"; advice = "⚠️ Moderate heat warning. Stay hydrated, take breaks, wear light clothing."; aqiCategory = "Moderate"; }
+        else if (temp > 25 || thi > 70) { alertLevel = "CAUTION"; advice = "⚠️ Warm conditions. Stay hydrated and ventilate rooms."; aqiCategory = "Moderate"; }
+        else if (temp < 12) { alertLevel = "COLD"; advice = "❄️ Cold conditions. Dress warmly, limit exposure to cold winds."; aqiCategory = "Good"; }
+        else { alertLevel = "NORMAL"; advice = "✅ Comfortable conditions. Enjoy fresh air and outdoor activities."; aqiCategory = "Good"; }
+        
+        if (hum > 80) advice += " 💧 Very high humidity: risk of mold, use ventilation.";
+        else if (hum > 70) advice += " 💧 High humidity: feels muggy, stay in well-ventilated areas.";
+        if (temp > 30) advice += " 🌡️ Risk of heat exhaustion: drink water regularly.";
+        
+        return { thi, alertLevel, advice, aqiCategory };
+    }
+
+    function saveReadingToLocal(temp, hum, location, deviceId) {
+        const analysis = analyzeEnvironment(temp, hum);
+        const newReading = {
+            id: Date.now(),
+            timestamp: new Date().toLocaleString(),
+            location: location,
+            temperature: temp,
+            humidity: hum,
+            thi: analysis.thi,
+            alertLevel: analysis.alertLevel,
+            advice: analysis.advice,
+            aqiCategory: analysis.aqiCategory,
+            deviceId: deviceId || "manual"
+        };
+        readings.unshift(newReading);  // newest first
+        if (readings.length > 200) readings.pop();
+        localStorage.setItem("aqm_readings", JSON.stringify(readings));
+        
+        // Create alert if not NORMAL
+        if (analysis.alertLevel !== "NORMAL" && analysis.alertLevel !== "CAUTION") {
+            let alertObj = { id: Date.now() + Math.random(), timestamp: newReading.timestamp, level: analysis.alertLevel, message: analysis.advice, temp: temp, hum: hum };
+            alertsDB.unshift(alertObj);
+            if (alertsDB.length > 50) alertsDB.pop();
+            localStorage.setItem("aqm_alerts", JSON.stringify(alertsDB));
+        }
+        return newReading;
+    }
+
+    function loadDataFromStorage() {
+        const stored = localStorage.getItem("aqm_readings");
+        if (stored) readings = JSON.parse(stored);
+        const storedAlerts = localStorage.getItem("aqm_alerts");
+        if (storedAlerts) alertsDB = JSON.parse(storedAlerts);
+        else alertsDB = [];
+        if (readings.length === 0) {
+            // seed some friendly demo data for zambia context
+            const demo = [
+                { temp: 26.5, hum: 58, loc: "Lusaka CBD" }, { temp: 32.2, hum: 72, loc: "Kitwe Industrial" }, { temp: 29.8, hum: 68, loc: "Ndola" },
+                { temp: 34.0, hum: 65, loc: "Chingola" }, { temp: 23.4, hum: 55, loc: "Livingstone" }, { temp: 31.5, hum: 78, loc: "Kafue" }
+            ];
+            demo.forEach(d => {
+                const ana = analyzeEnvironment(d.temp, d.hum);
+                readings.push({ id: Date.now()+Math.random(), timestamp: new Date().toLocaleString(), location: d.loc, temperature: d.temp, humidity: d.hum, thi: ana.thi, alertLevel: ana.alertLevel, advice: ana.advice, aqiCategory: ana.aqiCategory });
+            });
+            localStorage.setItem("aqm_readings", JSON.stringify(readings));
+        }
+    }
+
+    // UI update functions
+    function updateAllUI() {
+        updateHomeStats();
+        updateDashboard();
+        updateAlertsPage();
+        updateHistoryTable();
+        updateTrendChart();
+    }
+
+    function updateHomeStats() {
+        if (readings.length === 0) return;
+        let latest = readings[0];
+        document.getElementById("homeTemp").innerHTML = latest.temperature + "°C";
+        document.getElementById("homeHum").innerHTML = latest.humidity + "%";
+        document.getElementById("homeTHI").innerHTML = latest.thi || "--";
+        let activeAlertsCount = alertsDB.filter(a => true).length;
+        document.getElementById("homeAlertCount").innerHTML = activeAlertsCount;
+    }
+
+    function updateDashboard() {
+        if (!readings.length) return;
+        let latest = readings[0];
+        document.getElementById("dashTemp").innerHTML = latest.temperature + "°C";
+        document.getElementById("dashHum").innerHTML = latest.humidity + "%";
+        document.getElementById("dashTHI").innerHTML = latest.thi || "--";
+        document.getElementById("dashAQI").innerHTML = latest.aqiCategory || "Good";
+        const adviceHtml = `<div><i class="fas fa-heartbeat"></i> <strong>Health Advisory:</strong> ${latest.advice}</div><div style="margin-top:12px;"><span class="badge-zambia">📍 ${latest.location}</span> <span class="badge-zambia">🕒 ${latest.timestamp}</span></div>`;
+        document.getElementById("dashboardAdvice").innerHTML = adviceHtml;
+    }
+
+    function updateAlertsPage() {
+        const container = document.getElementById("alertsContainer");
+        if (!alertsDB.length) { container.innerHTML = "<div class='card'>✅ No active alerts. Environmental conditions are stable.</div>"; return; }
+        container.innerHTML = alertsDB.map(alert => `<div class="alert-card alert-${alert.level}"><strong><i class="fas fa-exclamation-triangle"></i> ${alert.level} ALERT</strong> <span style="float:right;">${alert.timestamp}</span><div>${alert.message}</div><div style="font-size:0.8rem; margin-top:6px;">Temp: ${alert.temp}°C | Humidity: ${alert.hum}%</div></div>`).join('');
+    }
+
+    function updateHistoryTable() {
+        const tbody = document.getElementById("historyTbody");
+        if (!readings.length) { tbody.innerHTML = "<tr><td colspan='7'>No readings yet. Add your first reading!</td></tr>"; return; }
+        tbody.innerHTML = readings.slice(0, 30).map(r => `<tr><td>${r.timestamp}</td><td>${r.location}</td><td>${r.temperature}°C</td><td>${r.humidity}%</td><td>${r.thi || '--'}</td><td style="color:${r.alertLevel==='CRITICAL'?'#ff7777':'#ffaa66'}">${r.alertLevel}</td><td>${r.advice.substring(0,70)}...</td></tr>`).join('');
+    }
+
+    let chart;
+    function updateTrendChart() {
+        const ctx = document.getElementById("trendChart")?.getContext('2d');
+        if (!ctx) return;
+        let last10 = readings.slice(0,10).reverse();
+        let labels = last10.map(r => r.timestamp.substring(5,16));
+        let temps = last10.map(r => r.temperature);
+        if (chart) chart.destroy();
+        chart = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [{ label: 'Temperature (°C)', data: temps, borderColor: '#2dd4bf', tension: 0.3, fill: true, backgroundColor: 'rgba(45,212,191,0.1)' }] }, options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { labels: { color: '#eef' } } }, scales: { y: { grid: { color: '#2d5f6b' } } } } });
+    }
+
+    // Event: Add reading
+    document.getElementById("readingForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        let temp = parseFloat(document.getElementById("tempInput").value);
+        let hum = parseFloat(document.getElementById("humInput").value);
+        let location = document.getElementById("locationSelect").value;
+        let deviceId = document.getElementById("deviceId").value;
+        if (isNaN(temp) || isNaN(hum)) { alert("Please enter valid numbers"); return; }
+        const saved = saveReadingToLocal(temp, hum, location, deviceId);
+        updateAllUI();
+        document.getElementById("tempInput").value = "";
+        document.getElementById("humInput").value = "";
+        const resultDiv = document.getElementById("analysisLiveResult");
+        resultDiv.style.display = "block";
+        resultDiv.innerHTML = `<div class="card alert-${saved.alertLevel}"><h3>✅ Reading Saved!</h3><p><strong>Location:</strong> ${saved.location} | <strong>Temp:</strong> ${saved.temperature}°C | <strong>Humidity:</strong> ${saved.humidity}%</p><p><strong>THI:</strong> ${saved.thi} | <strong>Alert:</strong> ${saved.alertLevel}</p><p><i class="fas fa-comment-medical"></i> ${saved.advice}</p></div>`;
+        setTimeout(() => { resultDiv.style.display = "none"; }, 6000);
+        switchToPage('history'); // show updated history automatically
+    });
+
+    function generateMockReadings() {
+        const mock = [{t:34.2, h:72, loc:"Kitwe"},{t:30.5, h:68, loc:"Lusaka"},{t:36.0, h:58, loc:"Chingola"},{t:27.2, h:45, loc:"Livingstone"},{t:32.8, h:80, loc:"Ndola"}];
+        mock.forEach(m => saveReadingToLocal(m.t, m.h, m.loc, "demo"));
+        updateAllUI();
+        alert("Demo data added! Check History page.");
+        switchToPage('history');
+    }
+
+    function clearAllAlerts() {
+        alertsDB = [];
+        localStorage.setItem("aqm_alerts", JSON.stringify(alertsDB));
+        updateAlertsPage();
+        updateHomeStats();
+    }
+
+    function exportHistoryCSV() {
+        let csvRows = [["Timestamp","Location","Temperature(°C)","Humidity(%)","THI","Alert Level","Advice"]];
+        readings.forEach(r => { csvRows.push([r.timestamp, r.location, r.temperature, r.humidity, r.thi, r.alertLevel, r.advice]); });
+        let csv = csvRows.map(row => row.map(cell => `"${cell}"`).join(",")).join("\n");
+        let blob = new Blob([csv], {type: "text/csv"});
+        let a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "zambia_air_quality_history.csv";
+        a.click();
+    }
+
+    // contact form (mock)
+    document.getElementById("contactForm")?.addEventListener("submit", (e) => {
+        e.preventDefault();
+        alert("Thank you! Your message has been received. We'll reply soon.");
+        e.target.reset();
+    });
+
+    // page switching
+    function switchToPage(pageId) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+        let targetBtn = Array.from(document.querySelectorAll('.nav-btn')).find(btn => btn.getAttribute('data-page') === pageId);
+        if(targetBtn) targetBtn.classList.add('active');
+        if(pageId === 'history') updateHistoryTable();
+        if(pageId === 'dashboard') updateDashboard();
+        if(pageId === 'alerts') updateAlertsPage();
+        if(pageId === 'home') updateHomeStats();
+    }
+
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            let page = btn.getAttribute('data-page');
+            switchToPage(page);
+        });
+    });
+
+    // initial load
+    loadDataFromStorage();
+    updateAllUI();
+    if(readings.length) updateTrendChart();
+    window.switchToPage = switchToPage;
+    window.generateMockReadings = generateMockReadings;
+    window.clearAllAlerts = clearAllAlerts;
+    window.exportHistoryCSV = exportHistoryCSV;
+</script>
+</body>
+</html>
